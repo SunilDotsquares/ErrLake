@@ -1,0 +1,2 @@
+# ErrLake
+Error handling library
