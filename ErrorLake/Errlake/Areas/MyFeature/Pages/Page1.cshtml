@@ -1,0 +1,34 @@
+﻿@page
+@model Errlake.MyFeature.Pages.Page1Model
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Page1</title>
+</head>
+<body>
+    <table style="width:100%">
+        <thead>
+            <tr>
+                <td>Error</td>
+                <td>Error Date</td>
+                <td>Error URI</td>
+
+            </tr>
+        </thead>
+        @foreach (var item in Model.errors)
+        {
+            <tr>
+                <td>@item.ErrorTitle </td>
+                <td>@item.ErrorDate.ToString("dd-MMM-yyyy HH:mm:ss") </td>
+                <td>@item.RequestURI</td>
+            </tr>
+        }
+    </table>
+
+
+
+</body>
+</html>
