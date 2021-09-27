@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using Errlake.Error.Model;
 
 namespace Errlake.Error.Service
 {
@@ -36,10 +38,17 @@ namespace Errlake.Error.Service
              });
         }
 
-        public async Task SaveError(Exception ex, Model.ErrorRequest errorRequest)
+        public async Task SaveError(Exception ex, ErrorRequest errorRequest)
         {
             await Task.Run(() =>
             {
+                var stackTrace = new StackTrace(ex, true);
+                var errorFrame = stackTrace.GetFrame(0);
+                var fileName = errorFrame.GetFileName();
+                var ErrorLineNumber = errorFrame.GetFileLineNumber();
+                var MethodName = errorFrame.GetMethod().Name;
+
+                IsDuplicateError(ex, errorRequest);
                 using var db = new LiteDB.LiteDatabase(DatabaseFile);
                 var error = new Model.Error
                 {
@@ -52,11 +61,29 @@ namespace Errlake.Error.Service
                     RequestBody = errorRequest.RequestBody,
                     RequestHeader = errorRequest.RequestHeader,
                     RequestQueryString = errorRequest.RequestQueryString,
-                    RequestType = errorRequest.RequestType
+                    RequestType = errorRequest.RequestType,
+                    FilePath = fileName,
+                    ErrorLineNo = ErrorLineNumber,
+                    ErrorMethodName = MethodName,
+                    LastErrorOccurredAt = DateTime.Now
                 };
-                var mianError = db.GetCollection<Model.Error>("MainError");
-                mianError.Insert(error);
+                var mainError = db.GetCollection<Model.Error>("MainError");
+                mainError.Insert(error);
             });
+        }
+
+        private bool IsDuplicateError(Exception exception, ErrorRequest errorRequest)
+        {
+            var stackTrace = new StackTrace(exception, true);
+            var errorFrame = stackTrace.GetFrame(0);
+            var fileName = errorFrame.GetFileName();
+            var ErrorLineNumber = errorFrame.GetFileLineNumber();
+            var MethodName = errorFrame.GetMethod().Name;
+            using var db = new LiteDB.LiteDatabase(DatabaseFile);
+            var mainError = db.GetCollection<Model.Error>("MainError");
+            //var result = mainError.Query
+
+            return false;
         }
     }
 }

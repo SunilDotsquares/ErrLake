@@ -18,5 +18,10 @@ namespace Errlake.Error.Model
         public string RequestQueryString { get; set; }
         public string RequestType { get; set; }
         public string RequestBody { get; set; }
+
+        public string FilePath { get; set; }
+        public string ErrorMethodName { get; set; }
+        public int ErrorLineNo { get; set; }
+        public DateTime LastErrorOccurredAt { get; set; }
     }
 }
